@@ -1,0 +1,19 @@
+{
+  "name": "devtinder",
+  "version": "1.0.0",
+  "description": "Tinder for devs",
+  "main": "index.js",
+  "scripts": {
+    "dev":"nodemon src/app.js" 
+    
+  },
+  "keywords": [
+    "nodejs",
+    "javascript"
+  ],
+  "author": "Dhaval Joshi",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
