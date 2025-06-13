@@ -5,6 +5,7 @@ const app = express();
 app.get("/", (req, res) => {
   res.send("hello");
 });
+
 app.get("/post", (req, res) => {
   res.send("profile");
 });
