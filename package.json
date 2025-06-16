@@ -4,8 +4,7 @@
   "description": "Tinder for devs",
   "main": "index.js",
   "scripts": {
-    "dev":"nodemon src/app.js" 
-    
+    "dev": "nodemon src/app.js"
   },
   "keywords": [
     "nodejs",
@@ -14,6 +13,7 @@
   "author": "Dhaval Joshi",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "mongoose": "^8.15.2"
   }
 }
