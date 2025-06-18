@@ -9,6 +9,7 @@ const User = require("./Models/user");
 
 app.use(express.json()); //middleware to convert req coming in JSON to HS object so express server could understand+
 
+//Post the data (ADD DATA TO THE DATABSE)
 app.post("/signup", async (req, res) => {
   //created an instance of the MODEL (User)
   // console.log(req.body);
@@ -18,10 +19,11 @@ app.post("/signup", async (req, res) => {
     await user.save(); //this return promise that why asyn await used
     res.send("dynamic User data added Successfully!!!!!!");
   } catch (err) {
-    res.status(400).send("Data not added");
+    res.status(400).send("Error saving the user,data not added " + err.message);
   }
 });
 
+// this will reador find and return it in an ARRAY
 app.get("/user", async (req, res) => {
   const userEmail = req.body.emailId;
 
@@ -43,21 +45,50 @@ app.get("/feed", async (req, res) => {
   }
 });
 
+//Deleting a  User from ID
+app.delete("/user", async (req, res) => {
+  const firstName = req.body.firstName;
+  console.log(firstName);
+  try {
+    const delUser = await User.findOneAndDelete({ firstName: firstName });
+    // console.log("deluser Return object(DOCUMENT) of the data deleted",delUser);
+    res.send(
+      "user deleted,Name of user:" + delUser.firstName + " " + delUser.lastName
+    );
+  } catch (err) {
+    res.send("error deleting user");
+  }
+});
 
-//Deleting a  User from ID 
-app.delete("/user",async (req,res)=>{
-  const firstName=req.body.firstName
-  console.log(firstName)
-  try{
-    const delUser=await User.findOneAndDelete({"firstName":firstName});
-    console.log(delUser,"deluserslnjeb")
-    res.send("user deleted,Name of user:"+delUser.firstName+" "+delUser.lastName)
-    
+//Updating a user info
+app.patch("/user/:userId", async (req, res) => {
+  //here i am dynamically passing the id /user/:userId and in postman i am doing user/68529453e1c5772752d4b755
+  const userId = req.params.userId;
+  const data = req.body;
+
+  try {
+    //The below logic works as gatekeeping ,to not allow user to UPDATE any Data out of APPROVED fields
+    //like they cannot update EMAIL,but htey can update below approved if UPDATED email then it will trhow ERROR
+    const approvedKeys = ["gender", "age", "about", "skills"];
+    const isKeysApproved = Object.keys(data).every((key) =>
+      approvedKeys.includes(key)
+    );
+
+    if (!isKeysApproved) {
+      throw new Error("Unable to update your given data");
+    }
+
+    //If in  field  is checks the approved keys it will find and update
+    const updateEmail = await User.findByIdAndUpdate({ _id: userId }, data, {
+      runValidators: true,
+    });
+    // console.log(updateEmail);
+    res.send("User Data updated:", updateEmail);
+    // res.send("User email updated")
+  } catch (err) {
+    res.send("Error updating the data: " + err.message);
   }
-  catch(err){
-    res.send("error deleting user")
-  }
-})
+});
 
 connectDB().then(() => {
   console.log("DB connected");
