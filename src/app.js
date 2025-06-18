@@ -77,13 +77,16 @@ app.patch("/user/:userId", async (req, res) => {
     if (!isKeysApproved) {
       throw new Error("Unable to update your given data");
     }
+    if(data.skills?.length>=10){
+      throw new Error("Limit of skills to be added exceeded")
+    }
 
     //If in  field  is checks the approved keys it will find and update
     const updateEmail = await User.findByIdAndUpdate({ _id: userId }, data, {
-      runValidators: true,
+      runValidators: true,new:true
     });
     // console.log(updateEmail);
-    res.send("User Data updated:", updateEmail);
+    res.send("User Data updated:"+ updateEmail);
     // res.send("User email updated")
   } catch (err) {
     res.send("Error updating the data: " + err.message);
