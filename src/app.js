@@ -11,6 +11,21 @@ const { validation } = require("./utils/validation");
 
 app.use(express.json()); //middleware to convert req coming in JSON to HS object so express server could understand+
 
+//Post Login API
+app.post("/login", async (req, res) => {
+  const { emailId, password } = req.body;
+  const userData = await User.findOne({ emailId: emailId });
+  // console.log(userData)
+  if (!userData?.isEmailId) {
+    throw new Error("Email Id is not correct,enter valid email");
+  }
+  const comaprePassword = await bcrypt.compare(password, isEmailId.password);
+  if (!comaprePassword) {
+    throw new Error("Password is not correct .Please try correct one");
+  }
+  res.send("Logged in Successsfully!!!");
+});
+
 //Post the data (ADD DATA TO THE DATABSE)
 app.post("/signup", async (req, res) => {
   //created an instance of the MODEL (User)
