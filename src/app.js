@@ -2,7 +2,8 @@ const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const User = require("./Models/user");
-const {validation} = require("./utils/validation");
+const bcrypt = require("bcrypt");
+const { validation } = require("./utils/validation");
 
 // app.use("/admin", (req, res, next) => {
 //   res.send("Only admin route");
@@ -14,17 +15,23 @@ app.use(express.json()); //middleware to convert req coming in JSON to HS object
 app.post("/signup", async (req, res) => {
   //created an instance of the MODEL (User)
   try {
+    const { firstName, lastName, emailId, password } = req.body;
     //Validate the data from the client i.e(req.body)
     validation(req);
 
     //Encrypt the password before storing to the DB
-    
+    const passwordHash = await bcrypt.hash(password, 10);
+    // Store hash in your password DB.
+    console.log(passwordHash); //i have got the hash value of my password
 
     //Then save it to the DB
 
-    const { firstName, lastName, emailId, password } = req.body;
-
-    const user = new User(req.body);
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+    });
 
     await user.save(); //this return promise that why asyn await used
     res.send("dynamic User data added Successfully!!!!!!");
