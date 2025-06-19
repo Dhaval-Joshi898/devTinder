@@ -3,6 +3,8 @@ const connectDB = require("./config/database");
 const app = express();
 const User = require("./Models/user");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const { validation } = require("./utils/validation");
 
 // app.use("/admin", (req, res, next) => {
@@ -10,20 +12,52 @@ const { validation } = require("./utils/validation");
 // });
 
 app.use(express.json()); //middleware to convert req coming in JSON to HS object so express server could understand+
+app.use(cookieParser()); //middleware to read cookie otherwise guves undefined it not added this middleware
 
 //Post Login API
 app.post("/login", async (req, res) => {
-  const { emailId, password } = req.body;
-  const userData = await User.findOne({ emailId: emailId });
-  // console.log(userData)
-  if (!userData?.isEmailId) {
-    throw new Error("Email Id is not correct,enter valid email");
+  try {
+    const { emailId, password } = req.body;
+    // console.log(emailId)
+    const userData = await User.findOne({ emailId: emailId });
+
+    // console.log(userData.password)
+    if (!userData?.emailId) {
+      throw new Error("Email Id is not correct,enter valid email");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, userData?.password);
+
+    if (isPasswordValid) {
+      //Creating JWT token
+      const jwtToken = await jwt.sign(
+        { _id: userData?._id },
+        "dhaval@nodeProj"
+      );
+      //  console.log("TOKEN>",token)
+
+      //creating cookie ot store tokens
+      res.cookie("token", jwtToken);
+
+      res.send("Logged in Successsfully!!!");
+    } else {
+      throw new Error("Password is not correct .Please try correct one");
+    }
+  } catch (err) {
+    res.status(400).send("Error to login:" + err);
   }
-  const comaprePassword = await bcrypt.compare(password, isEmailId.password);
-  if (!comaprePassword) {
-    throw new Error("Password is not correct .Please try correct one");
-  }
-  res.send("Logged in Successsfully!!!");
+});
+
+app.get("/profile", async (req, res) => {
+  //to check if the token is correct and let access the user things
+  const {token}=req.cookies
+  console.log(token)
+  const decoded =await jwt.verify(token, "dhaval@nodeProj");
+  console.log("decodeddddd:"+decoded._id)
+
+  const userData=await User.findOne({_id:decoded._id})
+ 
+  res.send("Reading COokies:" + userData);
 });
 
 //Post the data (ADD DATA TO THE DATABSE)
