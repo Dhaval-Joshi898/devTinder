@@ -2,6 +2,7 @@ const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const User = require("./Models/user");
+const {validation} = require("./utils/validation");
 
 // app.use("/admin", (req, res, next) => {
 //   res.send("Only admin route");
@@ -12,14 +13,23 @@ app.use(express.json()); //middleware to convert req coming in JSON to HS object
 //Post the data (ADD DATA TO THE DATABSE)
 app.post("/signup", async (req, res) => {
   //created an instance of the MODEL (User)
-  // console.log(req.body);
-  const user = new User(req.body);
-
   try {
+    //Validate the data from the client i.e(req.body)
+    validation(req);
+
+    //Encrypt the password before storing to the DB
+    
+
+    //Then save it to the DB
+
+    const { firstName, lastName, emailId, password } = req.body;
+
+    const user = new User(req.body);
+
     await user.save(); //this return promise that why asyn await used
     res.send("dynamic User data added Successfully!!!!!!");
   } catch (err) {
-    res.status(400).send("Error saving the user,data not added " + err.message);
+    res.status(400).send("Error saving the user,data not added:" + err.message);
   }
 });
 
@@ -77,16 +87,17 @@ app.patch("/user/:userId", async (req, res) => {
     if (!isKeysApproved) {
       throw new Error("Unable to update your given data");
     }
-    if(data.skills?.length>=10){
-      throw new Error("Limit of skills to be added exceeded")
+    if (data.skills?.length >= 10) {
+      throw new Error("Limit of skills to be added exceeded");
     }
 
     //If in  field  is checks the approved keys it will find and update
     const updateEmail = await User.findByIdAndUpdate({ _id: userId }, data, {
-      runValidators: true,new:true
+      runValidators: true,
+      new: true,
     });
     // console.log(updateEmail);
-    res.send("User Data updated:"+ updateEmail);
+    res.send("User Data updated:" + updateEmail);
     // res.send("User email updated")
   } catch (err) {
     res.send("Error updating the data: " + err.message);
