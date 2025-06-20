@@ -15,7 +15,6 @@ const { userAuth } = require("./middlewares/auth");
 app.use(express.json()); //middleware to convert req coming in JSON to HS object so express server could understand+
 app.use(cookieParser()); //middleware to read cookie otherwise guves undefined it not added this middleware
 
-
 //Post the data (ADD DATA TO THE DATABSE)
 app.post("/signup", async (req, res) => {
   //created an instance of the MODEL (User)
@@ -45,7 +44,6 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-
 //Post Login API
 app.post("/login", async (req, res) => {
   try {
@@ -71,7 +69,12 @@ app.post("/login", async (req, res) => {
       //creating cookie to  store tokens and---> sending it back to the user{}
       res.cookie("token", jwtToken);
 
-      res.send("Logged in Successsfully!!! "+ userData.firstName+" "+userData.lastName);
+      res.send(
+        "Logged in Successsfully!!! " +
+          userData.firstName +
+          " " +
+          userData.lastName
+      );
     } else {
       throw new Error("Password is not correct .Please try correct one");
     }
@@ -90,8 +93,12 @@ app.get("/profile", userAuth, async (req, res) => {
   }
 });
 
-
-
+app.post("/sendConnectionRequest", userAuth, (req, res) => {
+  const user = req.userData;
+  res.send(
+    user.firstName + " " + user.lastName + " Send you a connection request"
+  );
+});
 
 connectDB().then(() => {
   console.log("DB connected");
