@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const { validation } = require("./utils/validation");
+const { userAuth } = require("./middlewares/auth");
 
 // app.use("/admin", (req, res, next) => {
 //   res.send("Only admin route");
@@ -32,11 +33,11 @@ app.post("/login", async (req, res) => {
       //Creating JWT token
       const jwtToken = await jwt.sign(
         { _id: userData?._id },
-        "dhaval@nodeProj"
-      );
+        "dhaval@devTinder$"
+      ); //hiding id and passing secret key
       //  console.log("TOKEN>",token)
 
-      //creating cookie ot store tokens
+      //creating cookie to  store tokens and---> sending it back to the user{}
       res.cookie("token", jwtToken);
 
       res.send("Logged in Successsfully!!!");
@@ -48,16 +49,14 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
-  //to check if the token is correct and let access the user things
-  const {token}=req.cookies
-  console.log(token)
-  const decoded =await jwt.verify(token, "dhaval@nodeProj");
-  console.log("decodeddddd:"+decoded._id)
-
-  const userData=await User.findOne({_id:decoded._id})
- 
-  res.send("Reading COokies:" + userData);
+app.get("/profile", userAuth, async (req, res) => {
+  try {
+    //From userAuth req.userData is set where we are getting user
+    const user = req.userData;
+    res.send(user);
+  } catch (err) {
+    res.status(400).send("Log In again:" + err.message);
+  }
 });
 
 //Post the data (ADD DATA TO THE DATABSE)
