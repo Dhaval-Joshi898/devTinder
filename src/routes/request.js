@@ -1,8 +1,8 @@
 const express = require("express");
-
 const requestRouter = express.Router();
+const {userAuth}=require("../middlewares/auth")
 
-requestRouter.post("/request/send", (req, res) => {
+requestRouter.post("/request/send",userAuth, (req, res) => {
   try {
     const user = req.userData;
     res.send(
