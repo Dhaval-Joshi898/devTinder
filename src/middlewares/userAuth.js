@@ -11,7 +11,7 @@ const userAuth = async (req, res, next) => {
 
     //validating token
     const decodedData = await jwt.verify(token, "dhaval@devTinder$");
-    console.log(decodedData._id); //_id which was given at time of creating jwt}
+    // console.log(decodedData._id); //_id which was given at time of creating jwt}
 
     //finding user if token vlaidated
     // based on this id got the info of logged in USER
