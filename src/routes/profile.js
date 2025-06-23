@@ -1,8 +1,11 @@
 const express = require("express");
 const profileRouter = express.Router();
-const {userAuth} = require("../middlewares/auth");
+const { userAuth } = require("../middlewares/userAuth");
+const User = require("../Models/user");
+const { validateEditProfileData } = require("../utils/validation");
+const bcrypt=require("bcrypt")
 
-profileRouter.get("/profile", userAuth, (req, res) => {
+profileRouter.get("/profile/view", userAuth, (req, res) => {
   try {
     //From userAuth req.userData is set where we are getting user
     const user = req.userData;
@@ -12,4 +15,81 @@ profileRouter.get("/profile", userAuth, (req, res) => {
   }
 });
 
-module.exports=profileRouter;
+profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+  try {
+    if (!validateEditProfileData(req)) {
+      throw new Error("Invalid edit request");
+    }
+    const loggedInUser = req.userData;
+
+    Object.keys(req.body).forEach((key) => (loggedInUser[key] = req.body[key]));
+    console.log("after update Logged in USer " + loggedInUser);
+
+    await loggedInUser.save();
+
+    res.json({message:loggedInUser.firstName +" " +"Updated Data Successfully",data:loggedInUser}
+    );
+  } catch (err) {
+    res.send("Error: " + err.message);
+  }
+});
+
+module.exports = profileRouter;
+
+
+profileRouter.patch("/profile/password",userAuth,async(req,res)=>{
+try{
+  const user=req.userData
+
+  const {currentPassword,passwordToUpdate}=req.body
+  
+  const isPasswordCheck=await bcrypt.compare(currentPassword,user.password)
+   console.log("ispasswordcheck",isPasswordCheck)
+  if(!isPasswordCheck){
+    throw new Error("Your current Password added is wrong.Please add correct password to update ")
+  }
+
+  const updatedPassword=await bcrypt.hash(passwordToUpdate,10)
+  console.log("OLD password hash",user.password)
+  console.log("NEW udpated password hash:--",updatedPassword)
+
+  user.password=updatedPassword
+  user.save()
+  res.json({message:user.firstName+",your password has been updated successfully",data:user})
+}
+catch(err){
+  res.json({message:err.message})
+}
+  
+})
+
+// try {
+// profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+// My logic of updating the data
+//   // console.log(req.body);
+//   const { _id } = req.userData;
+//   const { age, about, skills, gender } = req.body;
+
+//   const updatedData = {};
+//   const allowedFields = ["age", "about", "skills", "gender","firstName","lastName"];
+
+// req updated data { age: 20, about: undefined, skills: undefined, gender: 'Male' }
+// bcoz of above line below logic
+
+//   allowedFields.forEach((field) => {
+//     if (req.body[field] !== undefined) {
+//       updatedData[field] = req.body[field];
+//     }
+//   });
+
+//   console.log("req updated data", updatedData);
+
+//   const updatedUser = await User.findOneAndUpdate({ _id: _id }, updateData, {
+//     new: true,
+//   });
+//   // console.log(updatedUser);
+
+//   res.send(updatedUser);
+// } catch (err) {
+// res.send("ERROR :" + err.message);
+// }
