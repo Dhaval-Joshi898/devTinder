@@ -2,7 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const User = require("../Models/user");
 const jwt = require("jsonwebtoken");
-const { validation } = require("../utils/validation");
+const { validateSignUpData } = require("../utils/validation");
 const authRouter = express.Router();
 
 //Post the data (ADD DATA TO THE DATABSE)(//instead of app we will use approuter it works same as app. alla thing same)
@@ -11,7 +11,7 @@ authRouter.post("/signup", async (req, res) => {
   try {
     const { firstName, lastName, emailId, password } = req.body;
     //Validate the data from the client i.e(req.body)
-    validation(req);
+    validateSignUpData(req);
 
     //Encrypt the password before storing to the DB
     const passwordHash = await bcrypt.hash(password, 10);
@@ -55,7 +55,7 @@ authRouter.post("/login", async (req, res) => {
 
     if (isPasswordValid) {
       //Creating JWT token
-      const jwtToken = await jwt.sign({ _id: userData?._id }, "nder$", {
+      const jwtToken = await jwt.sign({ _id: userData?._id }, "dhaval@devTinder$", {
         expiresIn: "1d",
       }); //hiding id and passing secret key
       //  console.log("TOKEN>",token)
