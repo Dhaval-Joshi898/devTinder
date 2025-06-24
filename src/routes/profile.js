@@ -77,19 +77,54 @@ profileRouter.post(
   userAuth,
   async (req, res) => {
     try {
-      const fromUserId = req.userData; //getting this from userAuth attachign it to req
+      const fromUserId = req.userData._id; //getting this from userAuth attaching it to req
       const toUserId = req.params.toUserId;
       const status = req.params.status;
 
+      //checking the case where sender is sending request to own
+      if (fromUserId == toUserId) {
+        console.log(fromUserId == toUserId);
+        throw new Error("You Cannot send to request to own(you)");
+      }
+
+      //if the to user  exist in user db or not in our app
+      const isToUserId = await User.findById(toUserId);
+      if (!isToUserId) {
+        throw new Error(
+          "The request you are sending to person in not in the DB"
+        );
+      }
+
+      //is status Interested or ignored only
+      const allowedStatus = ["interested", "ignored"];
+      if (!allowedStatus.includes(status)) {
+        throw new Error("Status is not valid for this req");
+      }
+
+      //also schecking if the sender(fromUser) has already send the REQ (toUser)
+      //OR the (toUSer has send the req to from user  basically dhaval to steve OR steve to dhaval)
+      const isRequestSent = await ConnectionRequestModel.findOne({
+        $or: [
+          { fromUserId, toUserId },
+          { fromUserId: toUserId, toUserId: fromUserId },
+        ],
+      });
+
+      if (isRequestSent) {
+        throw new Error("Req has already send once");
+      }
+
+      //after checking the validation create the instance (document)
       const connectionRequest = new ConnectionRequestModel({
         fromUserId,
         toUserId,
         status,
       });
-      res.send("connection req send");
-      connectionRequest.save();
+
+      const data = await connectionRequest.save();
+      res.send(req.userData.firstName+" "+(status==="interested"?"interested in":"ignored")+" "+isToUserId.firstName);
     } catch (err) {
-      res.send("Error", err.message);
+      res.send("Error: " + err.message);
     }
   }
 );
