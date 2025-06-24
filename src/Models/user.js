@@ -28,9 +28,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       validate(value) {
         if (!validator.isStrongPassword(value)) {
-          throw new Error(" \" Password should be of minimum 8 character with min 1 lowercase and uppercase and any symbols\" ");
+          throw new Error(
+            ' " Password should be of minimum 8 character with min 1 lowercase and uppercase and any symbols" '
+          );
         }
-      }
+      },
     },
     gender: {
       type: String,
