@@ -12,12 +12,14 @@ const connectionRequestSchema = new mongoose.Schema(
       type:String,
         enum:{
             values:["accepted","rejected","ignored","interested"],
-            message:`{values} is not the correct status,not acceptale`
+            message:`{VALUE} is incorrect Status type`
         }
     }
   },
   { timestamps: true }
 );
+
+connectionRequestSchema.index({fromUserId:1,toUserId:1})  //compound indexe to make queries faster
 
 const ConnectionRequestModel=mongoose.model("ConnectionRequest",connectionRequestSchema);
 
