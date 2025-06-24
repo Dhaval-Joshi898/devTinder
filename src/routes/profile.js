@@ -3,7 +3,8 @@ const profileRouter = express.Router();
 const { userAuth } = require("../middlewares/userAuth");
 const User = require("../Models/user");
 const { validateEditProfileData } = require("../utils/validation");
-const bcrypt=require("bcrypt")
+const bcrypt = require("bcrypt");
+const ConnectionRequestModel = require("../Models/ConnectionRequest");
 
 profileRouter.get("/profile/view", userAuth, (req, res) => {
   try {
@@ -27,8 +28,10 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
 
     await loggedInUser.save();
 
-    res.json({message:loggedInUser.firstName +" " +"Updated Data Successfully",data:loggedInUser}
-    );
+    res.json({
+      message: loggedInUser.firstName + " " + "Updated Data Successfully",
+      data: loggedInUser,
+    });
   } catch (err) {
     res.send("Error: " + err.message);
   }
@@ -36,32 +39,60 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
 
 module.exports = profileRouter;
 
+profileRouter.patch("/profile/password", userAuth, async (req, res) => {
+  try {
+    const user = req.userData;
 
-profileRouter.patch("/profile/password",userAuth,async(req,res)=>{
-try{
-  const user=req.userData
+    const { currentPassword, passwordToUpdate } = req.body;
 
-  const {currentPassword,passwordToUpdate}=req.body
-  
-  const isPasswordCheck=await bcrypt.compare(currentPassword,user.password)
-   console.log("ispasswordcheck",isPasswordCheck)
-  if(!isPasswordCheck){
-    throw new Error("Your current Password added is wrong.Please add correct password to update ")
+    const isPasswordCheck = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+    console.log("ispasswordcheck", isPasswordCheck);
+
+    if (!isPasswordCheck) {
+      throw new Error(
+        "Your current Password added is wrong.Please add correct password to update "
+      );
+    }
+
+    const updatedPassword = await bcrypt.hash(passwordToUpdate, 10);
+    console.log("OLD password hash", user.password);
+    console.log("NEW udpated password hash:--", updatedPassword);
+
+    user.password = updatedPassword;
+    user.save();
+    res.json({
+      message: user.firstName + ",your password has been updated successfully",
+      data: user,
+    });
+  } catch (err) {
+    res.json({ message: err.message });
   }
+});
 
-  const updatedPassword=await bcrypt.hash(passwordToUpdate,10)
-  console.log("OLD password hash",user.password)
-  console.log("NEW udpated password hash:--",updatedPassword)
+profileRouter.post(
+  "/request/send/:status/:toUserId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const fromUserId = req.userData; //getting this from userAuth attachign it to req
+      const toUserId = req.params.toUserId;
+      const status = req.params.status;
 
-  user.password=updatedPassword
-  user.save()
-  res.json({message:user.firstName+",your password has been updated successfully",data:user})
-}
-catch(err){
-  res.json({message:err.message})
-}
-  
-})
+      const connectionRequest = new ConnectionRequestModel({
+        fromUserId,
+        toUserId,
+        status,
+      });
+      res.send("connection req send");
+      connectionRequest.save();
+    } catch (err) {
+      res.send("Error", err.message);
+    }
+  }
+);
 
 // try {
 // profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
