@@ -88,10 +88,10 @@ profileRouter.post(
       }
 
       //if the to user  exist in user db or not in our app
-      const isToUserId = await User.findById(toUserId);
-      if (!isToUserId) {
+      const toUser = await User.findById(toUserId);
+      if (!toUser) {
         throw new Error(
-          "The request you are sending to person in not in the DB"
+          "The request you are sending to person in not in the DB,does not exist"
         );
       }
 
@@ -103,15 +103,15 @@ profileRouter.post(
 
       //also schecking if the sender(fromUser) has already send the REQ (toUser)
       //OR the (toUSer has send the req to from user  basically dhaval to steve OR steve to dhaval)
-      const isRequestSent = await ConnectionRequestModel.findOne({
+      const existingConnectRequest = await ConnectionRequestModel.findOne({
         $or: [
           { fromUserId, toUserId },
           { fromUserId: toUserId, toUserId: fromUserId },
         ],
       });
 
-      if (isRequestSent) {
-        throw new Error("Req has already send once");
+      if (existingConnectRequest) {
+        throw new Error("Connection request Already exists");
       }
 
       //after checking the validation create the instance (document)
@@ -122,7 +122,15 @@ profileRouter.post(
       });
 
       const data = await connectionRequest.save();
-      res.send(req.userData.firstName+" "+(status==="interested"?"interested in":"ignored")+" "+isToUserId.firstName);
+      res.json({
+        message:
+          req.userData.firstName +
+          " " +
+          (status === "interested" ? "interested in" : "ignored") +
+          " " +
+          toUser.firstName,
+        data,
+      });
     } catch (err) {
       res.send("Error: " + err.message);
     }
