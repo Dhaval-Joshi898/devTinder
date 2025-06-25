@@ -76,8 +76,8 @@ userRouter.get("/feed", userAuth, async (req, res) => {
         { _id: { $nin: Array.from(hideUserFromFeed) } },
         { _id: { $ne: loggedInUser._id } },
       ],
-    });
-    
+    }).select("firstName lastName age photoUrl about skills");
+
     res.send(allUsers);
     // res.send(Array.from(hideUserFromFeed));
   } catch (err) {
