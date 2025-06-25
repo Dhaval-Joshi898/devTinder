@@ -44,7 +44,7 @@ authRouter.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
     // console.log(emailId)
-    const userData = await User.findOne({ emailId: emailId });
+    const userData = await User.findOne({ emailId: emailId?.trim().toLowerCase()});
 
     // console.log(userData.password)
     if (!userData?.emailId) {
