@@ -91,7 +91,7 @@ requestRouter.post(
         return res.status(400).json({ message: "Status is not valid" });
       }
 
-      //to check and find is the connection and to user is loggedin user only
+      //to check and find is the connectionRequest is there  and toUser is loggedin user only
 
       const connectionRequest = await ConnectionRequestModel.findOne({
         _id: requestId,
@@ -100,7 +100,7 @@ requestRouter.post(
       });
 
       if (!connectionRequest) {
-        return res.json({ message: "Invalid Request" });
+        return res.json({ message: "Connection Request not found" });
       }
 
       connectionRequest.status = status;
