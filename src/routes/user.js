@@ -57,6 +57,10 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 userRouter.get("/feed", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.userData;
+    const page = req.query.page || 1;
+    let limit = req.query.limit || 10;
+    limit = limit > 50 ? 50 : limit; //checking otherwise user might put value in lakhs also keep in check
+    
 
     const isConnectionRequestPresent = await ConnectionRequestModel.find({
       $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
@@ -76,7 +80,12 @@ userRouter.get("/feed", userAuth, async (req, res) => {
         { _id: { $nin: Array.from(hideUserFromFeed) } },
         { _id: { $ne: loggedInUser._id } },
       ],
-    }).select("firstName lastName age photoUrl about skills");
+    })
+      .select("firstName lastName age photoUrl about skills")
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    //PAGINATION ;Only send 10 users at time at feed to SWIPE left/right
 
     res.send(allUsers);
     // res.send(Array.from(hideUserFromFeed));
