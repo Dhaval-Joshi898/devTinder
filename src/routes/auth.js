@@ -27,13 +27,18 @@ authRouter.post("/signup", async (req, res) => {
       password: passwordHash,
     });
 
-    await user.save(); //this return promise that why asyn await used
-    res.send(
-      "dynamic User data added Successfully!!!!!!Name of user is :" +
-        user.firstName +
-        " " +
-        user.lastName
+    const savedUser=await user.save(); //this return promise that why asyn await used
+
+    const jwtToken = await jwt.sign(
+      { _id: savedUser?._id },
+      "dhaval@devTinder$",
+      {
+        expiresIn: "1d",
+      }
     );
+     res.cookie("token", jwtToken);
+
+    res.json({message:"User Signed Up",data:savedUser} );
   } catch (err) {
     res.status(400).send("Error saving the user,data not added:" + err.message);
   }
@@ -44,7 +49,9 @@ authRouter.post("/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
     // console.log(emailId)
-    const userData = await User.findOne({ emailId: emailId?.trim().toLowerCase()});
+    const userData = await User.findOne({
+      emailId: emailId?.trim().toLowerCase(),
+    });
 
     // console.log(userData.password)
     if (!userData?.emailId) {
@@ -55,31 +62,34 @@ authRouter.post("/login", async (req, res) => {
 
     if (isPasswordValid) {
       //Creating JWT token
-      const jwtToken = await jwt.sign({ _id: userData?._id }, "dhaval@devTinder$", {
-        expiresIn: "1d",
-      }); //hiding id and passing secret key
+      const jwtToken = await jwt.sign(
+        { _id: userData?._id },
+        "dhaval@devTinder$",
+        {
+          expiresIn: "1d",
+        }
+      ); //hiding id and passing secret key
       //  console.log("TOKEN>",token)
 
       //creating cookie to  store tokens and---> sending it back to the user{}
       res.cookie("token", jwtToken);
 
-      res.send(
-        "Logged in Successsfully!!! " +
-          userData.firstName +
-          " " +
-          userData.lastName
-      );
+      res.send(userData);
+      //   res.send({message:
+      //     "Logged in Successsfully!!! " + userData.firstName +  " " +
+      //       userData.lastName,
+      //       data:userData
+      // });
     } else {
       throw new Error("Password is not correct .Please try correct one");
     }
   } catch (err) {
-    res.status(400).send("Error to login:" + err);
+    res.status(400).send(err.message);
   }
 });
 
 authRouter.post("/logout", async (req, res) => {
-
-  res.cookie("token", null, { expires: new Date(Date.now()) });  //either this way 
+  res.cookie("token", null, { expires: new Date(Date.now()) }); //either this way
   // res.clearCookie("token"); or THIS way
   res.send("Logged out ,Login  again");
 });
