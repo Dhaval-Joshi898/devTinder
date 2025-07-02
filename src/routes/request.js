@@ -24,7 +24,7 @@ requestRouter.post(
 
       //checking the case where sender is sending request to own
       if (fromUserId == toUserId) {
-        console.log(fromUserId == toUserId);
+        // console.log(fromUserId == toUserId);
         throw new Error("You Cannot send to request to own(you)");
       }
 

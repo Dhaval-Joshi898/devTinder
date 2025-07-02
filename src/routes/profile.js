@@ -24,7 +24,7 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
     const loggedInUser = req.userData;
 
     Object.keys(req.body).forEach((key) => (loggedInUser[key] = req.body[key]));
-    console.log("after update Logged in USer " + loggedInUser);
+    // console.log("after update Logged in USer " + loggedInUser);
 
     await loggedInUser.save();
 
@@ -49,7 +49,7 @@ profileRouter.patch("/profile/password", userAuth, async (req, res) => {
       currentPassword,
       user.password
     );
-    console.log("ispasswordcheck", isPasswordCheck);
+    // console.log("ispasswordcheck", isPasswordCheck);
 
     if (!isPasswordCheck) {
       throw new Error(
@@ -58,8 +58,8 @@ profileRouter.patch("/profile/password", userAuth, async (req, res) => {
     }
 
     const updatedPassword = await bcrypt.hash(passwordToUpdate, 10);
-    console.log("OLD password hash", user.password);
-    console.log("NEW udpated password hash:--", updatedPassword);
+    // console.log("OLD password hash", user.password);
+    // console.log("NEW udpated password hash:--", updatedPassword);
 
     user.password = updatedPassword;
     user.save();
@@ -83,7 +83,7 @@ profileRouter.post(
 
       //checking the case where sender is sending request to own
       if (fromUserId == toUserId) {
-        console.log(fromUserId == toUserId);
+        // console.log(fromUserId == toUserId);
         throw new Error("You Cannot send to request to own(you)");
       }
 
