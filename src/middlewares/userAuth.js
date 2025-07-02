@@ -6,7 +6,8 @@ const userAuth = async (req, res, next) => {
     //to check if the token is correct and let access the user things
     const { token } = req.cookies;
     if (!token) {
-      throw new Error("Token does not exist");
+      // throw new Error("Token does not exist");
+      return res.status(401).send("Please Login")
     }
 
     //validating token
