@@ -11,6 +11,8 @@ app.use(cors({
   credentials:true
 })) //to allow frontend to req backend or to know backend that allow req form frontend
 
+axios.defaults.withCredentials = true;
+
 app.use(express.json()); //middleware to convert req coming in JSON to JS object so express server could understand+
 app.use(cookieParser()); //middleware to read cookie otherwise guves undefined it not added this middleware
 
