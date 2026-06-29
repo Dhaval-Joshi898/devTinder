@@ -7,15 +7,23 @@ const http=require("http");
 
 require("dotenv").config();
 
+// 👇 1. FIRST: debug middleware (ADD HERE)
+app.use((req, res, next) => {
+  console.log("HEADERS COOKIE:", req.headers.cookie);
+  console.log("PARSED COOKIE:", req.cookies);
+  next();
+});
+
+app.use(cookieParser()); //middleware to read cookie otherwise guves undefined it not added this middleware
+
 app.use(cors({
   origin:["http://localhost:5173","https://dev-tinder-web-opal-ten.vercel.app"],
   credentials:true
 })) //to allow frontend to req backend or to know backend that allow req form frontend
 
 
-
 app.use(express.json()); //middleware to convert req coming in JSON to JS object so express server could understand+
-app.use(cookieParser()); //middleware to read cookie otherwise guves undefined it not added this middleware
+
 
 const authRouter=require("./routes/auth")
 const profileRouter=require("./routes/profile")
