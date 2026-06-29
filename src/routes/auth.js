@@ -108,7 +108,11 @@ authRouter.post("/signup", async (req, res) => {
       }
     );
 
-    res.cookie("token", jwtToken);
+    res.cookie("token", jwtToken, {
+      httpOnly: true,
+      secure: true,        // must be true in production (HTTPS)
+      sameSite: "none",    // required for cross-site frontend/backend
+    });
 
     res.json({
       message: "User Signed Up Successfully",
