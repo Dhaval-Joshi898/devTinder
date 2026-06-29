@@ -5,6 +5,8 @@ const User = require("../Models/user");
 const { validateEditProfileData } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 const ConnectionRequestModel = require("../Models/ConnectionRequest");
+const {upload}=require("../utils/cloudinaryStorage")
+const {postUpload}=require("../utils/cloudinaryStorage")
 
 profileRouter.get("/profile/view", userAuth, (req, res) => {
   try {
@@ -16,27 +18,48 @@ profileRouter.get("/profile/view", userAuth, (req, res) => {
   }
 });
 
-profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+profileRouter.patch("/profile/edit", userAuth,upload.single("photo"), async (req, res) => {
   try {
-    if (!validateEditProfileData(req)) {
-      throw new Error("Invalid edit request");
-    }
-    const loggedInUser = req.userData;
+      if (!validateEditProfileData(req)) {
+        throw new Error("Invalid edit request");
+      }
+      const loggedInUser = req.userData;
 
-    Object.keys(req.body).forEach((key) => (loggedInUser[key] = req.body[key]));
-    // console.log("after update Logged in USer " + loggedInUser);
+      // update text fields
+      Object.keys(req?.body).forEach((key) => {
+        loggedInUser[key] = req?.body[key];
+      });
 
-    await loggedInUser.save();
+      // if image uploaded
+      if (req?.file) {
+        loggedInUser.photoUrl = req?.file?.path;
+      }
 
-    res.json({
-      message: loggedInUser.firstName + " " + "Updated Data Successfully",
-      data: loggedInUser,
-    });
+      await loggedInUser.save();
+
+      res.json({
+        message:
+          loggedInUser.firstName +
+          " Updated Data Successfully",
+
+        data: loggedInUser,
+      });
+      console.log("UPDATE API CLICKed")
+  } catch (err) {
+      console.log(err);
+      res.status(400).send("Error: " + err.message);
+  }
+});
+
+profileRouter.patch("/profile/editCloudinary", userAuth, upload.single("photo"),async (req, res) => {
+  try {
+    console.log(req.file);
+
+    console.log(req.body);
   } catch (err) {
     res.send("Error: " + err.message);
   }
 });
-
 module.exports = profileRouter;
 
 profileRouter.patch("/profile/password", userAuth, async (req, res) => {
