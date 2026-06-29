@@ -7,7 +7,7 @@ const http=require("http");
 require("dotenv").config();
 
 app.use(cors({
-  origin:"http://localhost:5173",
+  origin:["http://localhost:5173","https://dev-tinder-web-opal-ten.vercel.app"],
   credentials:true
 })) //to allow frontend to req backend or to know backend that allow req form frontend
 
