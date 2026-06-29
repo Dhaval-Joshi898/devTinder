@@ -56,6 +56,8 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
 
 userRouter.get("/feed", userAuth, async (req, res) => {
   try {
+    console.log("COOKIES:", req.cookies);
+    console.log("HEADERS:", req.headers);
     const loggedInUser = req.userData;
     const page = req.query.page || 1;
     let limit = req.query.limit || 10;
